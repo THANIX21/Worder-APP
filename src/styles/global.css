@@ -1,29 +1,54 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Special+Gothic+Condensed+One&display=swap');@import "tailwindcss";
 
 @theme {
-    --color-primary: #963C01;
-    --color-p_lt10: #A65321;
-    --color-p_lt20: #B66B41;
-    --color-p_lt30: #C68361;
-    --color-p_dk10: #863501;
-    --color-p_dk20: #752E01;
-    --color-p_dk30: #652601;
+    --color-primary: #CA3401;
+    --color-p_lt15: #D35938;
+    --color-p_lt30: #DB7E6F;
+    --color-p_lt45: #E4A4A5;
 
-    --color-secondary: #FEFCE8 ;
-    --color-s_lt10: #FEFDEB;
-    --color-s_lt20: #FEFEEE;
-    --color-s_lt30: #FEFFF1;
-    --color-s_dk10: #E5E2CF;
-    --color-s_dk20: #CCC7B6;
-    --color-s_dk30: #B3AC9D;
+    --color-secondary: #FFC8C8;
+    --color-s_dk15: #D9AAAA;
+    --color-s_dk30: #B38C8C;
+    --color-s_dk45: #8C6E6E;
 
-    --color-accent: #017C96;
-    --color-a_lt10: #2D93A9;
-    --color-a_lt20: #5DADC0;
-    --color-a_lt30: #8DC7D6;
-    --color-a_dk10: #016F86;
-    --color-a_dk20: #015F74;
-    --color-a_dk30: #014F62;
+    --color-accent: #0093B9;
+    --color-a_dk15: #007D9E;
+    --color-a_dk30: #006782;
+    --color-a_dk45: #005167;
 
-    --color-f_bright: #FFFFFF
+    --color-fbright: #FFF6EC;
+    --color-fdark: #053244;
+}
+
+html{
+    font-family: "Special Gothic Condensed One", sans-serif;
+    letter-spacing: 1px;
+}
+
+.worder-button {
+    background-color: var(--color-accent);
+    color: var(--color-fbright);
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-bottom: 4px solid var(--color-a_dk45);
+    border-radius: 0.25rem;
+    transition: all 0.1s ease;
+}
+  
+.worder-button:hover {
+    background-color: var(--color-a_dk45);
+    color: var(--color-fbright);
+    border-bottom-color: var(--color-a_dk15);
+}
+
+.worder-button:active {
+    background-color: var(--color-p_lt30);
+    border-bottom-width: 2px;
+    transform: translateY(2px);
+}
+
+.hidden {
+    display: none;
 }
