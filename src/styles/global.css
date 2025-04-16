@@ -1,54 +1,106 @@
-@import url('https://fonts.googleapis.com/css2?family=Special+Gothic+Condensed+One&display=swap');@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Special+Gothic+Condensed+One&display=swap');
+@import "tailwindcss";
 
 @theme {
-    --color-primary: #CA3401;
-    --color-p_lt15: #D35938;
-    --color-p_lt30: #DB7E6F;
-    --color-p_lt45: #E4A4A5;
+  --color-primary: #CA3401;
+  --color-p_lt15: #D35938;
+  --color-p_lt30: #DB7E6F;
+  --color-p_lt45: #E4A4A5;
 
-    --color-secondary: #FFC8C8;
-    --color-s_dk15: #D9AAAA;
-    --color-s_dk30: #B38C8C;
-    --color-s_dk45: #8C6E6E;
+  --color-secondary: #FEFCE8;
+  --color-s_dk15: #F3EEAF;
+  --color-s_dk30: #E4D86E;
+  --color-s_dk45: #D0BD2E;
 
-    --color-accent: #0093B9;
-    --color-a_dk15: #007D9E;
-    --color-a_dk30: #006782;
-    --color-a_dk45: #005167;
+  --color-accent: #0093B9;
+  --color-a_dk15: #007D9E;
+  --color-a_dk30: #006782;
+  --color-a_dk45: #005167;
 
-    --color-fbright: #FFF6EC;
-    --color-fdark: #053244;
+  --color-fbright: #FFF6EC;
+  --color-fdark: #053244;
 }
 
-html{
-    font-family: "Special Gothic Condensed One", sans-serif;
-    letter-spacing: 1px;
-}
-
-.worder-button {
-    background-color: var(--color-accent);
-    color: var(--color-fbright);
-    font-weight: bold;
-    text-transform: uppercase;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-bottom: 4px solid var(--color-a_dk45);
-    border-radius: 0.25rem;
-    transition: all 0.1s ease;
-}
-  
-.worder-button:hover {
-    background-color: var(--color-a_dk45);
-    color: var(--color-fbright);
-    border-bottom-color: var(--color-a_dk15);
-}
-
-.worder-button:active {
-    background-color: var(--color-p_lt30);
-    border-bottom-width: 2px;
-    transform: translateY(2px);
+html {
+  font-family: "Special Gothic Condensed One", sans-serif;
+  letter-spacing: 1px;
 }
 
 .hidden {
-    display: none;
+  display: none;
+}
+
+.worder-input {
+  background-color: var(--color-secondary);
+
+  border-radius: 8px;
+}
+
+.worder-button {
+  background-color: var(--color-p_lt15);
+  color: var(--color-fbright);
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border: none;
+  border-bottom: 4px solid var(--color-a_dk45);
+  border-radius: 15px;
+  transition: all 0.1s ease;
+  position: relative;
+  top: 0;
+}
+
+.worder-button:hover {
+  background-color: var(--color-a_dk45);
+  border-bottom-color: var(--color-a_dk15);
+  cursor: pointer;
+}
+
+.worder-button:active {
+  background-color: var(--color-p_lt30);
+  border-bottom-color: var(--color-a_dk15);
+  transform: translateY(2px);
+}
+
+.custom-dropdown {
+  position: relative;
+  user-select: none;
+  font-weight: bold;
+}
+
+.selected-option {
+  background-color: var(--color-secondary);
+  color: var(--color-fdark);
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.selected-option:hover {
+  background-color: var(--color-a_dk45);
+  color: var(--color-fbright);
+}
+
+.dropdown-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--color-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 10;
+  margin-top: 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-options li {
+  padding: 10px 15px;
+  cursor: pointer;
+  color: var(--color-fdark);
+}
+
+.dropdown-options li:hover {
+  background-color: var(--color-a_dk30);
+  color: var(--color-fbright);
 }

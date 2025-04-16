@@ -1,0 +1,24 @@
+---
+export interface Option {
+    id: number;
+    desc: string;
+}
+
+export interface Props {
+    options: Option[];
+    placeholder?: string;
+    customClass?: string;
+}
+const {
+    options,
+    placeholder = "Select an option",
+    customClass = "",
+} = Astro.props;
+---
+
+<div class={`custom-dropdown ${customClass}`}>
+    <div class="selected-option">{placeholder}</div>
+    <ul class="dropdown-options hidden">
+        {options.map((opt) => <li data-id={opt.id}>{opt.desc}</li>)}
+    </ul>
+</div>

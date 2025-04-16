@@ -12,9 +12,9 @@ import Nav from "../components/Nav.astro";
 		<meta name="generator" content={Astro.generator} />
 		<title>Worder</title>
 	</head>
-	<body class="bg-yellow-50">
+	<body class="bg-secondary flex flex-col h-screen">
 		<Nav/>
-		<main class="flex-1">
+		<main class="flex-1 overflow-hidden">
 			<slot />
 		</main>
 	</body>
