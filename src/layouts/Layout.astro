@@ -1,6 +1,7 @@
 ---
-import "../styles/global.css"
+import "../styles/global.css";
 import Nav from "../components/Nav.astro";
+import Alert from "../components/Alert.astro";
 ---
 
 <!doctype html>
@@ -13,7 +14,8 @@ import Nav from "../components/Nav.astro";
 		<title>Worder</title>
 	</head>
 	<body class="bg-secondary flex flex-col h-screen">
-		<Nav/>
+		<Nav />
+		<Alert />
 		<main class="flex-1 overflow-hidden">
 			<slot />
 		</main>

@@ -1,12 +1,19 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Dropdown from "../components/Dropdown.astro";
+import { getWordTypes } from "../api/words";
+import type { WordType } from "../types/word-type";
+
+const types = await getWordTypes();
+const dropdownOptions = types.map((wordtype: WordType) => ({
+    id: wordtype.id,
+    type: wordtype.type,
+}));
 ---
 
 <Layout>
-    <script type="module" src="/scripts/dropdown.js"></script>
     <div class="flex flex-col lg:flex-row h-full">
-        <div class="lg:w-1/2 text-center bg-secondary p-[40px]">
+        <div class="lg:w-1/2 text-center bg-secondary p-[20px] lg:pr-[10px]">
             <div class="bg-accent rounded-[7px] h-full">
                 <div class="text-3xl text-fbright p-[20px]">Add new word</div>
                 <div
@@ -14,25 +21,92 @@ import Dropdown from "../components/Dropdown.astro";
                 >
                 </div>
                 <div class="pt-5">
-                    <input class="bg-secondary rounded-[8px] w-1/3 h-8" />
-                </div>
-                <div class="pt-5">
-                    <button class="worder-button w-1/4">Add</button>
-                </div>
-                <div class="pt-5 pb-5 flex justify-center">
-                    <Dropdown
-                        options={[
-                            { id: 1, desc: "Noun" },
-                            { id: 2, desc: "Verb" },
-                        ]}
-                        placeholder="Select a word"
-                        customClass="w-1/5 "
+                    <input
+                        id="word-input"
+                        class="worder-input bg-secondary rounded-[8px] w-1/3 h-8 text-center"
                     />
+                </div>
+                <div class="pt-5 flex justify-center">
+                    <Dropdown
+                        options={dropdownOptions}
+                        placeholder="Select a type"
+                        customClass="w-1/4"
+                        id="word-type-dropdown"
+                    />
+                </div>
+                <div class="pt-5 pb-5">
+                    <button id="add-button" class="worder-button w-1/5"
+                        >Add</button
+                    >
                 </div>
             </div>
         </div>
-        <div class="w-full h-full lg:w-1/2 text-center p-1.5 bg-primary">
-            right
+        <div
+            class="w-full h-full lg:w-1/2 text-center lg:p-[20px] lg:pl-[10px] pr-[20px] pl-[20px]"
+        >
+            <div
+                class="w-full bg-secondary border-accent border-3 rounded-[7px] h-full"
+            >
+                <div class="flex bg-p_lt15 h-1/20 items-center justify-center">
+                    <input
+                        class="worder-input w-1/4 pl-[5px]"
+                        placeholder="Search words..."
+                    />
+                </div>
+                <div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        import { createWord } from "../api/words";
+
+        document
+            .getElementById("add-button")
+            ?.addEventListener("click", async () => {
+                const input = document.getElementById(
+                    "word-input",
+                ) as HTMLInputElement;
+                const dropdown = document.getElementById("word-type-dropdown");
+
+                const word = input?.value?.trim();
+                const selectedText =
+                    dropdown?.querySelector(".selected-option")?.textContent;
+                const selectedLi = Array.from(
+                    dropdown?.querySelectorAll("li") || [],
+                ).find((li) => li.textContent === selectedText);
+
+                const selectedId = Number(selectedLi?.getAttribute("data-id"));
+
+                if (!word || word == "") {
+                    window.showGlobalAlert("error", "Please enter a word");
+                } else if (!selectedId || selectedId == 0) {
+                    window.showGlobalAlert("error", "Please select a type");
+                } else {
+                    try {
+                        await createWord(word, selectedId).then((data) =>
+                            console.log(data),
+                        );
+
+                        window.showGlobalAlert(
+                            "success",
+                            "Word successfully added",
+                        );
+                        input.value = "";
+                    } catch (err) {
+                        window.showGlobalAlert("error", "Word insert failed");
+                    }
+                }
+            });
+    </script>
 </Layout>

@@ -32,8 +32,14 @@ html {
 
 .worder-input {
   background-color: var(--color-secondary);
-
   border-radius: 8px;
+  border: 1px solid transparent;
+  outline: none;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.worder-input:focus {
+  box-shadow: 0 0 0 2px var(--color-p_lt30);
 }
 
 .worder-button {
@@ -71,7 +77,7 @@ html {
 .selected-option {
   background-color: var(--color-secondary);
   color: var(--color-fdark);
-  padding: 10px 15px;
+  padding: 5px 10px;
   border-radius: 8px;
   cursor: pointer;
 }
@@ -79,6 +85,33 @@ html {
 .selected-option:hover {
   background-color: var(--color-a_dk45);
   color: var(--color-fbright);
+}
+
+@media (max-width: 600px) {
+  .dropdown-options {
+    max-height: 200px;
+    overflow-y: scroll !important;
+  }
+
+  /* Chrome, Edge, Safari */
+  .dropdown-options::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .dropdown-options::-webkit-scrollbar-thumb {
+    background-color: var(--color-a_dk30);
+    border-radius: 4px;
+  }
+
+  .dropdown-options::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  /* Firefox */
+  .dropdown-options {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-a_dk30) transparent;
+  }
 }
 
 .dropdown-options {
@@ -95,12 +128,22 @@ html {
 }
 
 .dropdown-options li {
-  padding: 10px 15px;
+  padding: 5px 10px;
   cursor: pointer;
   color: var(--color-fdark);
 }
 
 .dropdown-options li:hover {
   background-color: var(--color-a_dk30);
+  color: var(--color-fbright);
+}
+
+.alert-success {
+  background-color: var(--color-p_lt30);
+  color: var(--color-fbright);
+}
+
+.alert-error {
+  background-color: var(--color-a_dk45);
   color: var(--color-fbright);
 }

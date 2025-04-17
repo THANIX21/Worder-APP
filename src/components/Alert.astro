@@ -1,0 +1,36 @@
+---
+// src/components/Alert.astro
+const { type = "info", message = "" } = Astro.props;
+---
+
+<div
+    id="global-alert"
+    class={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg transition-opacity duration-300 hidden
+  ${type === "success" ? "bg-green-600 text-white" : ""}
+  ${type === "error" ? "bg-red-400 text-white" : ""}
+  ${type === "info" ? "bg-blue-500 text-white" : ""}
+`}
+>
+    {message}
+</div>
+
+<script>
+    window.showGlobalAlert = function (type = "info", message = "") {
+        const alertEl = document.getElementById("global-alert");
+        if (!alertEl) return;
+
+        alertEl.textContent = message;
+        alertEl.className = `fixed bottom-4 right-4 z-50 p-4 rounded-xl border-2 border-secondary shadow-lg transition-opacity duration-300
+      ${type === "success" ? "bg-green-600 text-white" : ""}
+      ${type === "error" ? "bg-red-400 text-white" : ""}
+      ${type === "info" ? "bg-accent text-white" : ""}`;
+
+        alertEl.classList.remove("hidden");
+        alertEl.style.opacity = "1";
+
+        setTimeout(() => {
+            alertEl.style.opacity = "0";
+            setTimeout(() => alertEl.classList.add("hidden"), 300);
+        }, 3000);
+    };
+</script>

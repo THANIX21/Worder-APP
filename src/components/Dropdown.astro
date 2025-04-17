@@ -1,24 +1,70 @@
 ---
 export interface Option {
     id: number;
-    desc: string;
+    type: string;
 }
 
 export interface Props {
     options: Option[];
     placeholder?: string;
     customClass?: string;
+    id?: string;
 }
+
 const {
     options,
     placeholder = "Select an option",
     customClass = "",
+    id = `dropdown-${Math.random().toString(36).substring(2, 9)}`, // Generate unique ID if not provided
 } = Astro.props;
 ---
 
-<div class={`custom-dropdown ${customClass}`}>
+<div class={`custom-dropdown ${customClass}`} id={id}>
     <div class="selected-option">{placeholder}</div>
     <ul class="dropdown-options hidden">
-        {options.map((opt) => <li data-id={opt.id}>{opt.desc}</li>)}
+        {options.map((opt) => <li data-id={opt.id}>{opt.type}</li>)}
     </ul>
 </div>
+
+<script define:vars={{ id }}>
+    // Use the id to select this specific dropdown
+    const dropdown = document.getElementById(id);
+    const selectedOption = dropdown?.querySelector(".selected-option");
+    const dropdownOptions = dropdown?.querySelector(".dropdown-options");
+    const options = dropdown?.querySelectorAll(".dropdown-options li");
+
+    if (dropdown && selectedOption && dropdownOptions && options) {
+        // Toggle dropdown visibility when clicking the selected option
+        selectedOption.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent immediate closing
+            dropdownOptions.classList.toggle("hidden");
+        });
+
+        // Handle option selection
+        options.forEach((option) => {
+            option.addEventListener("click", () => {
+                selectedOption.textContent = option.textContent || "";
+                dropdownOptions.classList.add("hidden");
+
+                // Dispatch event with the selected option details
+                dropdown.dispatchEvent(
+                    new CustomEvent("dropdownChange", {
+                        bubbles: true,
+                        detail: {
+                            id: option.getAttribute("data-id"),
+                            desc: option.textContent,
+                        },
+                    }),
+                );
+            });
+        });
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+        const target = e.target;
+        if (dropdown && !dropdown.contains(target)) {
+            dropdownOptions.classList.add("hidden");
+        }
+    });
+</script>
