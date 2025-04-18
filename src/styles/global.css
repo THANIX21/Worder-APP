@@ -27,7 +27,7 @@ html {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .worder-input {
@@ -43,7 +43,6 @@ html {
 }
 
 .worder-button {
-  background-color: var(--color-p_lt15);
   color: var(--color-fbright);
   font-weight: bold;
   text-transform: uppercase;
@@ -54,6 +53,8 @@ html {
   transition: all 0.1s ease;
   position: relative;
   top: 0;
+  display: inline-block;
+  text-decoration: none;
 }
 
 .worder-button:hover {
@@ -77,7 +78,6 @@ html {
 .selected-option {
   background-color: var(--color-secondary);
   color: var(--color-fdark);
-  padding: 5px 10px;
   border-radius: 8px;
   cursor: pointer;
 }
@@ -138,12 +138,48 @@ html {
   color: var(--color-fbright);
 }
 
-.alert-success {
-  background-color: var(--color-p_lt30);
-  color: var(--color-fbright);
+.word-bubble {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  margin: 0.25rem;
+  border-radius: 9999px;
+  color: var(--fdark);
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
-.alert-error {
-  background-color: var(--color-a_dk45);
-  color: var(--color-fbright);
+.bg-noun {
+  background-color: #FFB703;
+}
+
+.bg-verb {
+  background-color: #FB5607;
+}
+
+.bg-adjective {
+  background-color: #8338EC;
+}
+
+.bg-adverb {
+  background-color: #3A86FF;
+}
+
+.bg-pronoun {
+  background-color: #FF006E;
+}
+
+.bg-preposition {
+  background-color: #f0e000;
+}
+
+.bg-interjection {
+  background-color: #c939e6;
+}
+
+.bg-conjunction {
+  background-color: #2A9D8F;
+}
+
+.bg-determiner {
+  background-color: #8D99AE;
 }

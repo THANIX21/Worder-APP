@@ -1,8 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Dropdown from "../components/Dropdown.astro";
-import { getWordTypes } from "../api/words";
+import { getWordTypes } from "../api/words_api";
 import type { WordType } from "../types/word-type";
+import WordExplorer from "../components/WordExplorer.astro";
 
 const types = await getWordTypes();
 const dropdownOptions = types.map((wordtype: WordType) => ({
@@ -15,7 +16,7 @@ const dropdownOptions = types.map((wordtype: WordType) => ({
     <div class="flex flex-col lg:flex-row h-full">
         <div class="lg:w-1/2 text-center bg-secondary p-[20px] lg:pr-[10px]">
             <div class="bg-accent rounded-[7px] h-full">
-                <div class="text-3xl text-fbright p-[20px]">Add new word</div>
+                <div class="text-3xl text-fbright p-[20px]">Words</div>
                 <div
                     class="w-4/5 h-[2px] bg-gradient-to-r from-transparent via-secondary to-transparent mx-auto"
                 >
@@ -24,6 +25,7 @@ const dropdownOptions = types.map((wordtype: WordType) => ({
                     <input
                         id="word-input"
                         class="worder-input bg-secondary rounded-[8px] w-1/3 h-8 text-center"
+                        placeholder="Enter a word"
                     />
                 </div>
                 <div class="pt-5 flex justify-center">
@@ -31,12 +33,24 @@ const dropdownOptions = types.map((wordtype: WordType) => ({
                         options={dropdownOptions}
                         placeholder="Select a type"
                         customClass="w-1/4"
+                        liClass="h-8 pt-[4px]"
                         id="word-type-dropdown"
                     />
                 </div>
-                <div class="pt-5 pb-5">
-                    <button id="add-button" class="worder-button w-1/5"
-                        >Add</button
+                <div class="pt-5 pb-5 flex justify-center gap-3">
+                    <button
+                        id="add-button"
+                        class="worder-button bg-p_lt15 w-1/5">Add</button
+                    >
+                    <button
+                        id="clear-button"
+                        class="worder-button bg-s_dk45 text-fdark w-1/5"
+                        >Clear</button
+                    >
+                </div>
+                <div id="edit-controls" class="pb-5 hidden">
+                    <button id="delete-word-btn" class="worder-button bg-a_dk30"
+                        >Delete</button
                     >
                 </div>
             </div>
@@ -44,69 +58,217 @@ const dropdownOptions = types.map((wordtype: WordType) => ({
         <div
             class="w-full h-full lg:w-1/2 text-center lg:p-[20px] lg:pl-[10px] pr-[20px] pl-[20px]"
         >
-            <div
-                class="w-full bg-secondary border-accent border-3 rounded-[7px] h-full"
-            >
-                <div class="flex bg-p_lt15 h-1/20 items-center justify-center">
-                    <input
-                        class="worder-input w-1/4 pl-[5px]"
-                        placeholder="Search words..."
-                    />
-                </div>
-                <div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                </div>
-            </div>
+            <WordExplorer dropdownOptions={dropdownOptions} />
         </div>
     </div>
 
     <script>
-        import { createWord } from "../api/words";
+        import {
+            createWord,
+            getWord,
+            deleteWord,
+            editWord,
+        } from "../api/words_api";
+        import type { Word } from "../types";
 
-        document
-            .getElementById("add-button")
-            ?.addEventListener("click", async () => {
-                const input = document.getElementById(
-                    "word-input",
-                ) as HTMLInputElement;
-                const dropdown = document.getElementById("word-type-dropdown");
+        let selectedWord: Word | null = null;
+        let isEditing = false;
 
-                const word = input?.value?.trim();
-                const selectedText =
-                    dropdown?.querySelector(".selected-option")?.textContent;
-                const selectedLi = Array.from(
-                    dropdown?.querySelectorAll("li") || [],
-                ).find((li) => li.textContent === selectedText);
+        const wordInput = document.getElementById(
+            "word-input",
+        ) as HTMLInputElement;
+        const addButton = document.getElementById(
+            "add-button",
+        ) as HTMLButtonElement;
+        const clearButton = document.getElementById(
+            "clear-button",
+        ) as HTMLButtonElement;
+        const deleteButton = document.getElementById(
+            "delete-word-btn",
+        ) as HTMLButtonElement;
+        const dropdown = document.getElementById("word-type-dropdown");
+        const editControls = document.getElementById("edit-controls");
 
-                const selectedId = Number(selectedLi?.getAttribute("data-id"));
+        // reset UI to default state
+        function resetUI() {
+            selectedWord = null;
+            isEditing = false;
+            wordInput.value = "";
 
-                if (!word || word == "") {
-                    window.showGlobalAlert("error", "Please enter a word");
-                } else if (!selectedId || selectedId == 0) {
-                    window.showGlobalAlert("error", "Please select a type");
+            // reset dropdown
+            const defaultOption = dropdown?.querySelector(".selected-option");
+            if (defaultOption) {
+                defaultOption.textContent = "Select a type";
+            }
+
+            // back to Add
+            addButton.textContent = "Add";
+
+            // hide edit controls
+            editControls?.classList.add("hidden");
+        }
+
+        // Handle Add/Update button click
+        addButton?.addEventListener("click", async () => {
+            const word = wordInput?.value?.trim();
+            const selectedText =
+                dropdown?.querySelector(".selected-option")?.textContent;
+            const selectedLi = Array.from(
+                dropdown?.querySelectorAll("li") || [],
+            ).find((li) => li.textContent === selectedText);
+
+            // type
+            const selectedType = Number(selectedLi?.getAttribute("data-id"));
+
+            if (!word || word == "") {
+                window.showGlobalAlert("error", "Please enter a word");
+                return;
+            }
+
+            if (!selectedType || selectedType == 0) {
+                window.showGlobalAlert("error", "Please select a type");
+                return;
+            }
+
+            try {
+                if (isEditing && selectedWord) {
+                    // get values and change selected word before submitting edited version
+                    const updatedTerm = wordInput.value.trim();
+                    const selectedText =
+                        dropdown?.querySelector(
+                            ".selected-option",
+                        )?.textContent;
+                    const selectedLi = Array.from(
+                        dropdown?.querySelectorAll("li") || [],
+                    ).find((li) => li.textContent === selectedText);
+                    const updatedTypeId = Number(
+                        selectedLi?.getAttribute("data-id"),
+                    );
+
+                    selectedWord = {
+                        id: selectedWord.id,
+                        term: updatedTerm,
+                        dtCreated: selectedWord.dtCreated,
+                        dtAltered: selectedWord.dtAltered,
+                        type: updatedTypeId,
+                    };
+                    // update existing word
+                    await editWord(selectedWord).then((data) =>
+                        window.showGlobalAlert(
+                            "success",
+                            "Word successfully updated",
+                        ),
+                    );
                 } else {
-                    try {
-                        await createWord(word, selectedId).then((data) =>
-                            console.log(data),
-                        );
-
+                    // create new word
+                    await createWord(word, selectedType).then((data) =>
                         window.showGlobalAlert(
                             "success",
                             "Word successfully added",
-                        );
-                        input.value = "";
-                    } catch (err) {
-                        window.showGlobalAlert("error", "Word insert failed");
-                    }
+                        ),
+                    );
                 }
-            });
+
+                // refresh
+                window.dispatchEvent(new CustomEvent("words:refresh"));
+
+                // after successful operation
+                resetUI();
+            } catch (err) {
+                window.showGlobalAlert(
+                    "error",
+                    isEditing ? "Word update failed" : "Word insert failed",
+                );
+            }
+        });
+
+        // clear button
+        clearButton?.addEventListener("click", resetUI);
+
+        // word selection
+        document.addEventListener("word:selected", async (e) => {
+            const customEvent = e as CustomEvent;
+            const { id } = customEvent.detail;
+
+            selectedWord = await getWord(id);
+
+            if (selectedWord && selectedWord.id != 0) {
+                // input field
+                wordInput.value = selectedWord.term;
+
+                // dropdown
+                const typeText = getWordTypeName(selectedWord.type);
+                const selectedOption =
+                    dropdown?.querySelector(".selected-option");
+                if (selectedOption) {
+                    selectedOption.textContent = typeText;
+                }
+
+                // change Add button to Update
+                addButton.textContent = "Update";
+                isEditing = true;
+
+                // display edit controls
+                editControls?.classList.remove("hidden");
+
+                // show info section
+                const infoSection =
+                    document.getElementById("selected-word-info");
+                const wordText = document.getElementById("selected-word-text");
+
+                if (infoSection && wordText) {
+                    infoSection.classList.remove("hidden");
+                    wordText.textContent = `"${selectedWord.term}" (${typeText})`;
+                }
+            }
+        });
+
+        // delete button
+        deleteButton?.addEventListener("click", async () => {
+            if (!selectedWord) return;
+
+            if (confirm("Are you sure you want to delete this word?")) {
+                try {
+                    await deleteWord(selectedWord.id);
+
+                    // hide selected word info
+                    const infoSection =
+                        document.getElementById("selected-word-info");
+                    if (infoSection) {
+                        infoSection.classList.add("hidden");
+                    }
+
+                    resetUI();
+
+                    // refresh word list
+                    window.dispatchEvent(new CustomEvent("words:refresh"));
+
+                    window.showGlobalAlert(
+                        "success",
+                        "Word successfully deleted",
+                    );
+                } catch (err) {
+                    window.showGlobalAlert("error", "Failed to delete word");
+                }
+            }
+        });
+
+        // get word type name from ID
+        function getWordTypeName(typeId: number) {
+            const typeMap: { [key: number]: string } = {
+                1: "Noun",
+                2: "Verb",
+                3: "Adjective",
+                4: "Adverb",
+                5: "Pronoun",
+                6: "Preposition",
+                7: "Interjection",
+                8: "Conjunction",
+                9: "Determiner",
+            };
+            return typeMap[typeId] || "Unknown";
+        }
+
+        resetUI();
     </script>
 </Layout>

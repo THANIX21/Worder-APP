@@ -1,0 +1,236 @@
+---
+import Dropdown from "./Dropdown.astro";
+import { getAllWords } from "../api/words_api";
+import type { Word } from "../types/word";
+
+export interface Option {
+    id: number;
+    type: string;
+}
+
+export interface Props {
+    dropdownOptions: Option[];
+}
+const { dropdownOptions } = Astro.props;
+const words: Word[] = await getAllWords();
+const typeColourMap: { [key: number]: string } = {
+    1: "bg-noun",
+    2: "bg-verb",
+    3: "bg-adjective",
+    4: "bg-adverb",
+    5: "bg-pronoun",
+    6: "bg-preposition",
+    7: "bg-interjection",
+    8: "bg-conjunction",
+    9: "bg-determiner",
+};
+const typeClassMap: { [key: number]: string } = {
+    1: "Noun",
+    2: "Verb",
+    3: "Adjective",
+    4: "Adverb",
+    5: "Pronoun",
+    6: "Preposition",
+    7: "Interjection",
+    8: "Conjunction",
+    9: "Determiner",
+};
+
+function formatDate(dtString: any) {
+    return dtString.replace("T", " ").split(".")[0];
+}
+---
+
+<div
+    class="w-full bg-secondary border-accent border-3 rounded-[7px] h-full"
+    id="word-explorer"
+>
+    <div
+        class="flex bg-p_lt15 lg:h-[40px] h-[45px] items-center justify-center"
+    >
+        <input
+            class="worder-input w-1/4 lg:h-8 pl-[10px] mr-2"
+            id="word-search"
+            placeholder="Search words..."
+        />
+        <Dropdown
+            options={dropdownOptions}
+            placeholder="Filter word types"
+            customClass="w-1/4 ml-2"
+            liClass="lg:h-8 lg:pt-[4px] h-7 p-0.5"
+            id="word-filter-dropdown"
+        />
+        <button
+            id="clear-filters"
+            class="worder-button bg-accent text-white px-3 py-1 rounded-md ml-3 text-sm lg:h-8"
+        >
+            Clear Filters
+        </button>
+    </div>
+
+    <div class="p-2.5">
+        <div id="word-list" class="flex flex-wrap">
+            {
+                words.map((word) => (
+                    <span
+                        class={`word-bubble ${typeColourMap[word.type] ?? "bg-secondary"} cursor-pointer hover:brightness-90`}
+                        title={`${typeClassMap[word.type]} : ${formatDate(word.dtCreated)}`}
+                        data-type={word.type}
+                        data-id={word.id}
+                    >
+                        {word.term}
+                    </span>
+                ))
+            }
+        </div>
+    </div>
+
+    <script type="module">
+        const typeColourMap = {
+            1: "bg-noun",
+            2: "bg-verb",
+            3: "bg-adjective",
+            4: "bg-adverb",
+            5: "bg-pronoun",
+            6: "bg-preposition",
+            7: "bg-interjection",
+            8: "bg-conjunction",
+            9: "bg-determiner",
+        };
+        const typeClassMap = {
+            1: "Noun",
+            2: "Verb",
+            3: "Adjective",
+            4: "Adverb",
+            5: "Pronoun",
+            6: "Preposition",
+            7: "Interjection",
+            8: "Conjunction",
+            9: "Determiner",
+        };
+
+        // filter "states"
+        let currentTypeFilter = null;
+        let currentSearchTerm = "";
+
+        async function getAllWords() {
+            const res = await fetch("/api/words/all");
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
+        }
+
+        // select components by id for events pertaining to them
+        const wordExplorerEl = document.getElementById("word-explorer");
+        const wordListEl = document.getElementById("word-list");
+        const searchInput = document.getElementById("word-search");
+        const dropdown = document.getElementById("word-filter-dropdown");
+        const clearFiltersBtn = document.getElementById("clear-filters");
+
+        // click event for all words, so this component can send id to parent component / page
+        function setupWordClickHandlers() {
+            const wordBubbles = wordListEl.querySelectorAll(".word-bubble");
+            wordBubbles.forEach((bubble) => {
+                bubble.addEventListener("click", (e) => {
+                    const term = e.target.textContent.trim();
+                    const wordId = e.target.getAttribute("data-id");
+                    const wordClickEvent = new CustomEvent("word:selected", {
+                        bubbles: true,
+                        detail: {
+                            id: wordId,
+                            term: term,
+                        },
+                    });
+
+                    // dispatch event from explorer container
+                    wordExplorerEl.dispatchEvent(wordClickEvent);
+                });
+            });
+        }
+
+        function applyFilters() {
+            // select bubbles
+            const allWordBubbles = wordListEl.querySelectorAll(".word-bubble");
+
+            allWordBubbles.forEach((bubble) => {
+                const wordText = bubble.textContent.toLowerCase();
+                const wordType = bubble.getAttribute("data-type");
+
+                // compare text
+                const matchesSearch =
+                    !currentSearchTerm ||
+                    wordText.includes(currentSearchTerm.toLowerCase());
+                // compare type
+                const matchesType =
+                    !currentTypeFilter || wordType === currentTypeFilter;
+
+                if (matchesSearch && matchesType) {
+                    bubble.style.display = "";
+                } else {
+                    bubble.style.display = "none";
+                }
+            });
+        }
+
+        // search input handler
+        searchInput.addEventListener("input", (e) => {
+            currentSearchTerm = e.target.value.trim();
+            applyFilters();
+        });
+
+        // dropdown input handler
+        dropdown.addEventListener("dropdownChange", (e) => {
+            currentTypeFilter = e.detail.id;
+            applyFilters();
+        });
+
+        // clear filter handler
+        clearFiltersBtn.addEventListener("click", () => {
+            currentTypeFilter = null;
+            currentSearchTerm = "";
+
+            searchInput.value = "";
+            const selectedOption = dropdown.querySelector(".selected-option");
+            if (selectedOption) {
+                selectedOption.textContent = "Filter word types";
+            }
+
+            applyFilters();
+        });
+
+        // function to fetch fresh list from db
+        async function fetchWords() {
+            try {
+                const words = await getAllWords();
+                wordListEl.innerHTML = "";
+
+                words.forEach((word) => {
+                    const bubble = document.createElement("span");
+                    const bgClass = typeColourMap[word.type] || "bg-secondary";
+                    const typeName = typeClassMap[word.type] || "Unknown";
+                    bubble.className = `word-bubble ${bgClass} cursor-pointer hover:brightness-90`;
+                    bubble.textContent = word.term;
+                    bubble.setAttribute("data-id", word.id);
+                    bubble.setAttribute("data-type", word.type);
+                    bubble.title = `${typeName} : ${formatDate(word.dtCreated)}`;
+                    wordListEl.appendChild(bubble);
+                });
+
+                setupWordClickHandlers();
+                applyFilters();
+            } catch (err) {
+                window.showGlobalAlert(
+                    "error",
+                    "Failed to retrieve list of words",
+                );
+            }
+        }
+
+        function formatDate(dtString) {
+            return dtString.replace("T", " ").split(".")[0];
+        }
+
+        setupWordClickHandlers();
+        //event listener for when word list needs to be refreshed (create, update, delete words)
+        window.addEventListener("words:refresh", fetchWords);
+    </script>
+</div>

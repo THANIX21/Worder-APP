@@ -1,5 +1,7 @@
 export type Word = {
     id: number,
-    word: string,
+    term: string,
+    dtCreated: Date,
+    dtAltered: Date
     type: number
 }

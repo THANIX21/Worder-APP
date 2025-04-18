@@ -1,3 +1,5 @@
+import type { Word } from "../types";
+
 const API_BASE = import.meta.env.PUBLIC_API_BASE_URL;
 
 // Helper function to extract error message from the response body
@@ -12,6 +14,12 @@ async function getErrorMessage(res: Response) {
 
 export async function getWordTypes() {
     const res = await fetch(`${API_BASE}/words/types`);
+    if (!res.ok) throw new Error(await getErrorMessage(res));
+    return res.json();
+}
+
+export async function getAllWords() {
+    const res = await fetch(`${API_BASE}/words/all`);
     if (!res.ok) throw new Error(await getErrorMessage(res));
     return res.json();
 }
@@ -32,8 +40,8 @@ export async function createWord(_term: string, _type: number) {
     return res.json();
 }
 
-export async function editWord(id: number, data: Record<string, any>) {
-    const res = await fetch(`${API_BASE}/words/${id}`, {
+export async function editWord(data: Word) {
+    const res = await fetch(`${API_BASE}/words/${data.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

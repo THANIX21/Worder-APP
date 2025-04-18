@@ -1,5 +1,5 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout>
@@ -7,20 +7,29 @@ import Layout from '../layouts/Layout.astro';
         Welcome to Worder, the word management tool.
     </h1>
     <div class="text-center">
-        <button id="start-button" class="worder-button">
+        <button id="start-button" class="worder-button bg-p_lt15">
             Start
         </button>
-        
+
         <div id="option-buttons" class="hidden w-full">
             <div class="flex relative">
                 <div class="w-1/2 text-center pt-8">
-                    <a href="/words" class="worder-button">Add words</a>
-                </div>                
-                <div class="absolute top-0 bottom-0 left-1/2 transform -translate-x-1/2 pointer-events-none">
-                    <div class="w-px h-full bg-gradient-to-b from-transparent via-a_dk45 to-transparent"></div>
-                </div>                
+                    <a href="/words" class="worder-button bg-p_lt15"
+                        >Add words</a
+                    >
+                </div>
+                <div
+                    class="absolute top-0 bottom-0 left-1/2 transform -translate-x-1/2 pointer-events-none"
+                >
+                    <div
+                        class="w-px h-full bg-gradient-to-b from-transparent via-a_dk45 to-transparent"
+                    >
+                    </div>
+                </div>
                 <div class="w-1/2 text-center pt-8">
-                    <a href="/sentences" class="worder-button">Build sentences</a>
+                    <a href="/sentences" class="worder-button bg-p_lt15"
+                        >Build sentences</a
+                    >
                 </div>
             </div>
         </div>
@@ -28,14 +37,16 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const startButton = document.getElementById('start-button');
-        const optionButtons = document.getElementById('option-buttons');
-        
+    document.addEventListener("DOMContentLoaded", () => {
+        const startButton = document.getElementById("start-button");
+        const optionButtons = document.getElementById("option-buttons");
+
         if (startButton && optionButtons) {
-            startButton.addEventListener('click', () => {
-                startButton.classList.add('hidden');
-                optionButtons.classList.remove('hidden');
+            startButton.addEventListener("click", () => {
+                setTimeout(() => {
+                    startButton.classList.add("hidden");
+                    optionButtons.classList.remove("hidden");
+                }, 150);
             });
         }
     });

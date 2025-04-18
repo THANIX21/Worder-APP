@@ -1,7 +1,106 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
+import Dropdown from "../components/Dropdown.astro";
+import { getWordTypes } from "../api/words_api";
+import type { WordType } from "../types/word-type";
+import WordExplorer from "../components/WordExplorer.astro";
+
+const types = await getWordTypes();
+const dropdownOptions = types.map((wordtype: WordType) => ({
+    id: wordtype.id,
+    type: wordtype.type,
+}));
 ---
 
 <Layout>
-    Sentence
+    <div class="flex flex-col lg:flex-row h-full">
+        <div class="lg:w-1/2 text-center bg-secondary p-[20px] lg:pr-[10px]">
+            <div class="bg-accent rounded-[7px] h-full">
+                <div class="text-3xl text-fbright p-[20px]">Sentences</div>
+                <div
+                    class="w-4/5 h-[2px] bg-gradient-to-r from-transparent via-secondary to-transparent mx-auto"
+                >
+                </div>
+                <div class="pt-5">
+                    <input
+                        id="word-input"
+                        class="worder-input bg-secondary rounded-[8px] w-1/2 h-8 text-center"
+                        placeholder="Enter or build a sentence with words from the right"
+                    />
+                </div>
+                <div class="pt-5 pb-5 flex justify-center gap-3">
+                    <button
+                        id="create-button"
+                        class="worder-button bg-p_lt15 text-fdark w-1/5"
+                        >Create</button
+                    >
+                    <button
+                        id="clear-button"
+                        class="worder-button bg-s_dk45 text-fdark w-1/5"
+                        >Clear</button
+                    >
+                </div>
+            </div>
+        </div>
+        <div
+            class="w-full h-full lg:w-1/2 text-center lg:p-[20px] lg:pl-[10px] pr-[20px] pl-[20px]"
+        >
+            <WordExplorer dropdownOptions={dropdownOptions} />
+        </div>
+    </div>
 </Layout>
+
+<script type="module">
+    const wordInput = document.getElementById("word-input");
+    const wordExplorer = document.getElementById("word-explorer");
+
+    // Listen for the custom word:selected event
+    wordExplorer.addEventListener("word:selected", async (e) => {
+        const word = e.detail.term;
+
+        // Append the word to the input box
+        const current = wordInput.value.trim();
+        wordInput.value = current ? `${current} ${word}` : word;
+    });
+</script>
+
+<script>
+    import { createSentence } from "../api/sentences_api";
+
+    const wordInput = document.getElementById("word-input") as HTMLInputElement;
+    const createButton = document.getElementById(
+        "create-button",
+    ) as HTMLInputElement;
+    const clearButton = document.getElementById(
+        "clear-button",
+    ) as HTMLInputElement;
+
+    createButton.addEventListener("click", async () => {
+        const inputValue = wordInput.value.trim();
+        if (!inputValue) return;
+
+        const words = inputValue.split(/\s+/);
+
+        const sentenceWords = words.map((word, index) => ({
+            word,
+            position: index + 1,
+        }));
+
+        try {
+            var response = await createSentence(sentenceWords);
+            if (response == 0) {
+                window.showGlobalAlert("error", "Error creating sentence");
+                return;
+            }
+
+            window.showGlobalAlert("success", "Sentence created!");
+            wordInput.value = "";
+        } catch (err) {
+            window.showGlobalAlert("error", "Sentence creation failed");
+        }
+    });
+
+    clearButton.addEventListener("click", () => {
+        wordInput.value = "";
+    });
+</script>
